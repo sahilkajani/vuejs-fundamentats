@@ -1,73 +1,81 @@
 <template>
-      <div>
+      <div class="content">
+        <button class="addToCart" @click="addToCart()" >Add to Cart </button>
     <div class="top-row">
-      <div class="top part">
-        <img v-bind:src="availableParts.heads[selectHeadIndex].src" title="head"/>
-        <button v-on:click="selectPreviousHead()" class="prev-selector">&#9668;</button>
-        <button v-on:click="selectNextHead()" class="next-selector">&#9658;</button>
+        <!-- <div class="robot-name">
+          {{selectedRobot.head.title}}
+          <span v-show="selectedRobot.head.onSale" class="sale">Sale</span>
+          </div> -->
+        <PartSelector/>
       </div>
-    </div>
     <div class="middle-row">
-      <div class="left part">
-        <img v-bind:src="availableParts.arms[0].src" title="left arm"/>
-        <button class="prev-selector">&#9650;</button>
-        <button class="next-selector">&#9660;</button>
-      </div>
-      <div class="center part">
-        <img v-bind:src="availableParts.torsos[0].src" title="left arm"/>
-        <button class="prev-selector">&#9668;</button>
-        <button class="next-selector">&#9658;</button>
-      </div>
-      <div class="right part">
-        <img v-bind:src="availableParts.arms[0].src" title="left arm"/>
-        <button class="prev-selector">&#9650;</button>
-        <button class="next-selector">&#9660;</button>
-      </div>
+          <PartSelector/>
+          <PartSelector/>
+          <PartSelector/>
     </div>
     <div class="bottom-row">
-      <div class="bottom part">
-        <img v-bind:src="availableParts.bases[0].src" title="left arm"/>
-        <button class="prev-selector">&#9668;</button>
-        <button class="next-selector">&#9658;</button>
-      </div>
+      <PartSelector/>
+    </div>
+    <div> 
+      <h1>Cart</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Robot</th>
+            <th class="cost">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(robot, index) in cart" :key="index">
+            <td>{{robot.head.title}}</td>
+            <td class="cost">{{robot.cost}}</td>
+          </tr>
+        </tbody>
+      </table>   
     </div>
   </div>
 </template>
 
 <script>
 import availableParts from '../data/parts.js'
-
-function getPreviousValidIndex(index, length) {
-  const depreciatedIndex = index - 1;
-  return depreciatedIndex < 0 ? length - 1: depreciatedIndex;
-}
-
-function getNextValidIndex(index, length) {
-  const incrementedIndex = index + 1;
-  return incrementedIndex > length - 1 ? 0 : incrementedIndex;   
-}
+import createdHookMixin from '../build/created-hook.mixin'
+import PartSelector from './PartSelector'
 
 
 export default {
     name: 'RobotBuilder',
+    components: {PartSelector},
     data() {
         return {
             availableParts,
-            selectHeadIndex: 0,
+            cart: [],
+            selectedRobot: {
+          head: {}
+      }
         }
     },
+    mixins: [createdHookMixin],
+    computed:{
+      headBorderStyle() {
+        return {border: this.selectedRobot.head.onSale ?
+         '3px solid red': 
+          '3px solid #aaa',
+          };
+      },
+    },
     methods: {
-        selectNextHead() {
-            this.selectHeadIndex = getNextValidIndex(this.selectHeadIndex, availableParts.heads.length);
-        },
-        selectPreviousHead(){
-           this.selectHeadIndex = getPreviousValidIndex(this.selectHeadIndex, availableParts.heads.length);
+        addToCart() {
+          const robot = this.selectedRobot;
+          const cost = robot.head.cost
+          // + robot.leftArm.cost +
+          // robot.torso.cost + robot.rightArm.cost + robot.base.cost;
+          this.cart.push(Object.assign({}, robot, {cost}));
         }
     }
 }
 </script>
 
-<style>
+<style scoped>
 .part {
   position: relative;
   width:165px;
@@ -155,5 +163,40 @@ export default {
 }
 .right .next-selector {
   right: -3px;
+}
+.robot-name {
+  position: absolute;
+  top: -25px;
+  text-align: center;
+  width: 100%;
+
+}
+.sale {
+color: red;
+}
+.content {
+  position: relative
+}
+
+.addToCart {
+  position: absolute;
+  right: 30px;
+  width:220px;
+  padding: 3px;
+  font-size:16px;
+}
+
+td, th {
+text-align: left;
+padding : 5px;
+padding-right: 20px;
+}
+
+.cost {
+  text-align: right;
+}
+
+.sale {
+  border: 3px solid red;
 }
 </style>
